@@ -1,0 +1,8 @@
+[package]
+name = "rocket-sim"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "rocket-sim"
+path = "main.rs"
