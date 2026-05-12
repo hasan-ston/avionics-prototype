@@ -1,3 +1,6 @@
+use rand::distributions::{Distribution, Uniform};
+use std::collections::VecDeque;
+
 #[derive(Debug, Clone, PartialEq)]
 enum FlightPhase {
     PreLaunch,
@@ -49,12 +52,29 @@ fn main () {
     };
 
     let mut current_phase = FlightPhase::PreLaunch;
-
     let dt = 0.1;
+    let mut rng = rand::thread_rng();
+    let vibrations = Uniform::new_inclusive(-2.0,2.0);
+    let mut accel_buffer: VecDeque<f32> = VecDeque::from(vec![0.0; 10]);
 
-    for movement in 0..30000 {
+    for movement in 0..100000 {
 
+        let noise = vibrations.sample(&mut rng);
+        let noisy_accl = my_rocket.acceleration + noise;
         let mut thrust = 0.0;
+
+        accel_buffer.pop_front();
+        accel_buffer.push_back(noisy_accl);
+
+        let mut weighted_sum = 0.0;
+        let mut weighted_total = 0.0;
+
+        for (index, value) in accel_buffer.iter().enumerate() {
+            let weight = (index + 1) as f32;
+            weighted_sum += value * weight;
+            weighted_total += weight;
+        }
+        let filtered_accl = weighted_sum/weighted_total;
 
         // The engine fires if we are in PreLaunch (at T+10) OR if we are in an ascent phase
         if current_phase == FlightPhase::PreLaunch && movement >= 10 {
@@ -74,16 +94,15 @@ fn main () {
         // Altitude = current altitude + (velocity * dt) + (0.5 * accel * dt * dt)
         let displacement = (my_rocket.velocity * dt) + (0.5 * my_rocket.acceleration * dt * dt);
         my_rocket.altitude += displacement; // adding to current altitude
-
         my_rocket.velocity += my_rocket.acceleration * dt;
 
-        let next_phase = transition(&current_phase, my_rocket.velocity, my_rocket.acceleration);
+        let next_phase = transition(&current_phase, my_rocket.velocity, filtered_accl);
+        if movement % 10 == 0 {
+            println!("T: {:>4.1}s | Raw Accel: {:>6.2} | Filtered: {:>6.2}", movement as f32 * dt, noisy_accl, filtered_accl);
+        }
         if next_phase != current_phase{
             println!("Altitude: {} | Velocity: {} | Phase: {:?} -> {:?}", my_rocket.altitude, my_rocket.velocity, current_phase, next_phase);
         }  
-
         current_phase = next_phase;
     }
 }
-
-// TODO: Handle noises

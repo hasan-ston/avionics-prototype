@@ -1,3 +1,4 @@
 - Referencing: https://impulso.space/tools/blog/posts/main-stages-in-a-rocket-launch
 - Implemented a state machine using rust enums and pattern matching, making it safe from any illegal state transitions
+- Added a weighted moving average to filter sensor noise
 - Inspired by low-level systems lnaguages, focusing on memory safety and explicit state management in order to minimize the risk of having undefined behavioural states
