@@ -3,7 +3,7 @@ enum FlightPhase {
     PreLaunch,
     PoweredAscentStage1,
     Meco,
-    StageSeperation,
+    StageSeparation,
     PoweredAscentStage2,
     OrbitReached,
 }
@@ -20,8 +20,8 @@ fn transition(current: &FlightPhase, velocity: f32, accel: f32) -> FlightPhase {
             else {FlightPhase::PoweredAscentStage1}
         }
 
-        FlightPhase::Meco => FlightPhase::StageSeperation, // seperating arms
-        FlightPhase::StageSeperation => FlightPhase::PoweredAscentStage2,
+        FlightPhase::Meco => FlightPhase::StageSeparation, // seperating arms
+        FlightPhase::StageSeparation => FlightPhase::PoweredAscentStage2,
 
         FlightPhase::PoweredAscentStage2 => {
             if velocity > 7800.0 { FlightPhase::OrbitReached}
